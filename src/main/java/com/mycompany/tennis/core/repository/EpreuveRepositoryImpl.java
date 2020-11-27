@@ -2,8 +2,6 @@ package com.mycompany.tennis.core.repository;
 
 import com.mycompany.tennis.core.DataSourceProvider;
 import com.mycompany.tennis.core.entity.Epreuve;
-import com.mycompany.tennis.core.entity.Tournoi;
-import com.mycompany.tennis.core.service.TournoiService;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
