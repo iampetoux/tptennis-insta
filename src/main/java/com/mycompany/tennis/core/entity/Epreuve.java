@@ -1,9 +1,25 @@
 package com.mycompany.tennis.core.entity;
 
+import org.hibernate.annotations.Table;
+
+import javax.persistence.*;
+
+@Entity
+@Table(appliesTo = "epreuves")
 public class Epreuve {
+    private  static final long serialVersionUID = 1L;
+    @Id
+    @Column
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
+    @Column
     private int annee;
+
+    @Column
     private Character typeEpreuve;
+
+    @Column
     private Tournoi tournoi;
 
     public long getId() {

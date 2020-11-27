@@ -1,219 +1,45 @@
 package com.mycompany.tennis.core.repository;
 
-import com.mycompany.tennis.core.DataSourceProvider;
+import com.mycompany.tennis.core.HibernateUtil;
 import com.mycompany.tennis.core.entity.Tournoi;
+import org.hibernate.Session;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import java.util.List;
 
 public class TournoiRepositoryImpl {
+
+    private final Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+
     public void create(Tournoi tournoi) {
-        Connection conn = null;
-        try {
-            DataSource dataSource = DataSourceProvider.getSingleDataSourceInstance();
-
-            conn = dataSource.getConnection();
-
-            //conn.setAutoCommit(false);
-
-            PreparedStatement preparedStatement =
-                    conn.prepareStatement("INSERT INTO tournois (NOM,CODE) VALUES(?,?)");
-
-            preparedStatement.setString(1, tournoi.getNom());
-            preparedStatement.setString(2, tournoi.getCode());
-
-            preparedStatement.executeUpdate();
-
-            System.out.println("Tournoi créé");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-
-                try {
-                    conn.rollback();
-                } catch (SQLException e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
-                }
-            }
-        }
+        session.persist(tournoi);
+        System.out.println("Tournoi crée");
     }
 
     public void update(Tournoi tournoi) {
-        Connection conn = null;
-        try {
-            DataSource dataSource = DataSourceProvider.getSingleDataSourceInstance();
-
-            conn = dataSource.getConnection();
-
-            //conn.setAutoCommit(false);
-
-            PreparedStatement preparedStatement =
-                    conn.prepareStatement("UPDATE tournois SET NOM=? , CODE=? WHERE ID=?");
-
-            preparedStatement.setString(1, tournoi.getNom());
-            preparedStatement.setString(2, tournoi.getCode());
-            preparedStatement.setLong(3, tournoi.getId());
-
-            preparedStatement.executeUpdate();
-
-            System.out.println("Tournoi modifié");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-
-                try {
-                    conn.rollback();
-                } catch (SQLException e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
-                }
-            }
-        }
+        session.update(tournoi);
+        System.out.println("Tournoi mis à jour");
     }
 
     public void delete(long id) {
-        Connection conn = null;
-        try {
-            DataSource dataSource = DataSourceProvider.getSingleDataSourceInstance();
-
-            conn = dataSource.getConnection();
-
-            //conn.setAutoCommit(false);
-
-            PreparedStatement preparedStatement =
-                    conn.prepareStatement("DELETE FROM tournois WHERE ID=?");
-            preparedStatement.setLong(1, id);
-
-            preparedStatement.executeUpdate();
-
-            System.out.println("Tournoi supprimé");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-
-                try {
-                    conn.rollback();
-                } catch (SQLException e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
-                }
-            }
-        }
+        Tournoi tournoi = new Tournoi();
+        tournoi.setId(id);
+        session.delete(tournoi);
+        System.out.println("Tournoi supprimé");
     }
 
     public Tournoi getById(long id) {
-        Connection conn = null;
-        Tournoi tournoi = null;
-        try {
-            DataSource dataSource = DataSourceProvider.getSingleDataSourceInstance();
-
-            conn = dataSource.getConnection();
-
-            //conn.setAutoCommit(false);
-
-            PreparedStatement preparedStatement =
-                    conn.prepareStatement("SELECT * FROM tournois WHERE id = ?");
-            preparedStatement.setLong(1, id);
-
-            ResultSet rs = preparedStatement.executeQuery();
-
-            if (rs.next()) {
-                tournoi = new Tournoi();
-                tournoi.setId(id);
-                tournoi.setNom(rs.getString("NOM"));
-                tournoi.setCode(rs.getString("CODE"));
-
-            }
-
-            System.out.println("Joueur lu");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-
-                try {
-                    conn.rollback();
-                } catch (SQLException e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
-                }
-            }
-        }
+        Tournoi tournoi = session.get(Tournoi.class, id);
+        System.out.println("Tournoi lu");
         return tournoi;
     }
 
     public List<Tournoi> list() {
-        Connection conn = null;
-        List<Tournoi> tournois = new ArrayList<>();
-        try {
-            DataSource dataSource = DataSourceProvider.getSingleDataSourceInstance();
-
-            conn = dataSource.getConnection();
-
-            //conn.setAutoCommit(false);
-
-            PreparedStatement preparedStatement =
-                    conn.prepareStatement("SELECT ID,NOM,CODE FROM tournois");
-
-            ResultSet rs = preparedStatement.executeQuery();
-
-            while (rs.next()) {
-                Tournoi tournoi = new Tournoi();
-                tournoi.setId(rs.getLong("ID"));
-                tournoi.setNom(rs.getString("NOM"));
-                tournoi.setCode(rs.getString("CODE"));
-                tournois.add(tournoi);
-
-            }
-
-            System.out.println("Joueurs lus");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-
-                try {
-                    conn.rollback();
-                } catch (SQLException e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
-                }
-            }
-        }
-        return tournois;
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<Tournoi> criteria = builder.createQuery(Tournoi.class);
+        criteria.from(Tournoi.class);
+        System.out.println("Tournois lus");
+        return session.createQuery(criteria).getResultList();
     }
 }

@@ -13,13 +13,10 @@ public class Joueur implements Serializable {
     @Column
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
     @Column
     private String nom;
-
     @Column
     private String prenom;
-
     @Column
     private Character sexe;
 

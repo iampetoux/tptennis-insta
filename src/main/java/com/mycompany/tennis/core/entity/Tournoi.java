@@ -5,7 +5,6 @@ import org.hibernate.annotations.Table;
 import javax.persistence.*;
 import java.io.Serializable;
 
-
 @Entity
 @Table(appliesTo = "tournois")
 public class Tournoi implements Serializable {
@@ -14,10 +13,8 @@ public class Tournoi implements Serializable {
     @Column
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
     @Column
     private String nom;
-
     @Column
     private String code;
 
