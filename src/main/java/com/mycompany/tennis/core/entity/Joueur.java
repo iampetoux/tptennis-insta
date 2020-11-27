@@ -1,9 +1,26 @@
 package com.mycompany.tennis.core.entity;
 
-public class Joueur {
+import org.hibernate.annotations.Table;
+
+import javax.persistence.*;
+import java.io.Serializable;
+
+@Entity
+@Table(appliesTo = "joueurs")
+public class Joueur implements Serializable {
+    private static final long serialVersionUID = 1L;
+    @Id
+    @Column
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
+
+    @Column
     private String nom;
+
+    @Column
     private String prenom;
+
+    @Column
     private Character sexe;
 
     public String getNom() {
@@ -36,5 +53,10 @@ public class Joueur {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    @Override
+    public String toString() {
+        return "Détails du joueur :\nId : " + this.id + "\nNom : " + this.nom + "\nPrénom : " + this.prenom + "\nSexe : " + this.sexe;
     }
 }
