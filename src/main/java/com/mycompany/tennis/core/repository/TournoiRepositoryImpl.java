@@ -22,9 +22,7 @@ public class TournoiRepositoryImpl {
         System.out.println("Tournoi mis à jour");
     }
 
-    public void delete(long id) {
-        Tournoi tournoi = new Tournoi();
-        tournoi.setId(id);
+    public void delete(Tournoi tournoi) {
         session.delete(tournoi);
         System.out.println("Tournoi supprimé");
     }
