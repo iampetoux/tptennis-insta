@@ -2,7 +2,7 @@ package com.mycompany.tennis.core.repository;
 
 import com.mycompany.tennis.core.DataSourceProvider;
 import com.mycompany.tennis.core.entity.Match;
-
+import com.mycompany.tennis.core.entity.Score;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -12,11 +12,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MatchRepositoryImpl {
-    private final JoueurRepositoryImpl joueurRepository = new JoueurRepositoryImpl();
-    private final EpreuveRepositoryImpl epreuveRepository = new EpreuveRepositoryImpl();
+public class ScoreRepositoryImpl {
+    private final MatchRepositoryImpl matchRepository = new MatchRepositoryImpl();
 
-    public void create(Match match) {
+    public void create(Score score) {
         Connection conn = null;
         try {
             DataSource dataSource = DataSourceProvider.getSingleDataSourceInstance();
@@ -26,15 +25,18 @@ public class MatchRepositoryImpl {
             //conn.setAutoCommit(false);
 
             PreparedStatement preparedStatement =
-                    conn.prepareStatement("INSERT INTO matchs (EPREUVE_ID,VAINQUEUR_ID,FINALISTE_ID) VALUES(?,?,?)");
+                    conn.prepareStatement("INSERT INTO scores (MATCH_ID, SET_1, SET_2, SET_3, SET_4, SET_5) VALUES(?, ?, ?, ?, ?, ?)");
 
-            preparedStatement.setLong(1, match.getEpreuve().getId());
-            preparedStatement.setLong(2, match.getVainqueur().getId());
-            preparedStatement.setLong(3, match.getFinaliste().getId());
+            preparedStatement.setLong(1, score.getMatch().getId());
+            preparedStatement.setByte(2, score.getSet1());
+            preparedStatement.setByte(3, score.getSet2());
+            preparedStatement.setByte(4, score.getSet3());
+            preparedStatement.setByte(5, score.getSet4());
+            preparedStatement.setByte(6, score.getSet5());
 
             preparedStatement.executeUpdate();
 
-            System.out.println("Match créé");
+            System.out.println("Score créé");
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -55,7 +57,7 @@ public class MatchRepositoryImpl {
         }
     }
 
-    public void update(Match match) {
+    public void update(Score score) {
         Connection conn = null;
         try {
             DataSource dataSource = DataSourceProvider.getSingleDataSourceInstance();
@@ -65,15 +67,18 @@ public class MatchRepositoryImpl {
             //conn.setAutoCommit(false);
 
             PreparedStatement preparedStatement =
-                    conn.prepareStatement("UPDATE matchs SET EPREUVE_ID=? , VAINQUEUR_ID=?, FINALISTE_ID=? WHERE ID=?");
+                    conn.prepareStatement("UPDATE scores SET MATCH_ID=? , SET_1=?, SET_2=?, SET_3=?, SET_4=?, SET_5=? WHERE ID=?");
 
-            preparedStatement.setLong(1, match.getEpreuve().getId());
-            preparedStatement.setLong(2, match.getVainqueur().getId());
-            preparedStatement.setLong(3, match.getFinaliste().getId());
+            preparedStatement.setLong(1, score.getMatch().getId());
+            preparedStatement.setLong(2, score.getSet1());
+            preparedStatement.setLong(3, score.getSet2());
+            preparedStatement.setLong(4, score.getSet3());
+            preparedStatement.setLong(5, score.getSet4());
+            preparedStatement.setLong(6, score.getSet5());
 
             preparedStatement.executeUpdate();
 
-            System.out.println("Match modifié");
+            System.out.println("Score modifié");
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -104,7 +109,7 @@ public class MatchRepositoryImpl {
             //conn.setAutoCommit(false);
 
             PreparedStatement preparedStatement =
-                    conn.prepareStatement("DELETE FROM matchs WHERE ID=?");
+                    conn.prepareStatement("DELETE FROM scores WHERE ID=?");
             preparedStatement.setLong(1, id);
 
             preparedStatement.executeUpdate();
@@ -130,9 +135,9 @@ public class MatchRepositoryImpl {
         }
     }
 
-    public Match getById(long id) {
+    public Score getById(long id) {
         Connection conn = null;
-        Match match = null;
+        Score score = null;
         try {
             DataSource dataSource = DataSourceProvider.getSingleDataSourceInstance();
 
@@ -141,20 +146,23 @@ public class MatchRepositoryImpl {
             //conn.setAutoCommit(false);
 
             PreparedStatement preparedStatement =
-                    conn.prepareStatement("SELECT * FROM matchs WHERE id = ?");
+                    conn.prepareStatement("SELECT * FROM scores WHERE id = ?");
             preparedStatement.setLong(1, id);
 
             ResultSet rs = preparedStatement.executeQuery();
 
             if (rs.next()) {
-                match = new Match();
-                match.setId(id);
-                match.setEpreuve(epreuveRepository.getById(rs.getLong("EPREUVE_ID")));
-                match.setVainqueur(joueurRepository.getById(rs.getLong("VAINQUEUR_ID")));
-                match.setVainqueur(joueurRepository.getById(rs.getLong("FINALISTE_ID")));
+                score = new Score();
+                score.setId(id);
+                score.setMatch(matchRepository.getById(rs.getLong("MATCH_ID")));
+                score.setSet1(rs.getByte("SET_1"));
+                score.setSet2(rs.getByte("SET_2"));
+                score.setSet3(rs.getByte("SET_3"));
+                score.setSet4(rs.getByte("SET_4"));
+                score.setSet5(rs.getByte("SET_5"));
             }
 
-            System.out.println("Match lu");
+            System.out.println("Score lu");
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -173,12 +181,12 @@ public class MatchRepositoryImpl {
                 }
             }
         }
-        return match;
+        return score;
     }
 
-    public List<Match> list() {
+    public List<Score> list() {
         Connection conn = null;
-        List<Match> matchs = new ArrayList<>();
+        List<Score> scores = new ArrayList<>();
         try {
             DataSource dataSource = DataSourceProvider.getSingleDataSourceInstance();
 
@@ -192,12 +200,15 @@ public class MatchRepositoryImpl {
             ResultSet rs = preparedStatement.executeQuery();
 
             while (rs.next()) {
-                Match match = new Match();
-                match.setId(rs.getLong("ID"));
-                match.setEpreuve(epreuveRepository.getById(rs.getLong("EPREUVE_ID")));
-                match.setVainqueur(joueurRepository.getById(rs.getLong("VAINQUEUR_ID")));
-                match.setVainqueur(joueurRepository.getById(rs.getLong("FINALISTE_ID")));
-                matchs.add(match);
+                Score score = new Score();
+                score.setId(rs.getLong("ID"));
+                score.setMatch(matchRepository.getById(rs.getLong("MATCH_ID")));
+                score.setSet1(rs.getByte("SET_1"));
+                score.setSet2(rs.getByte("SET_2"));
+                score.setSet3(rs.getByte("SET_3"));
+                score.setSet4(rs.getByte("SET_4"));
+                score.setSet5(rs.getByte("SET_5"));
+                scores.add(score);
 
             }
 
@@ -220,6 +231,6 @@ public class MatchRepositoryImpl {
                 }
             }
         }
-        return matchs;
+        return scores;
     }
 }
